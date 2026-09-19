@@ -1,0 +1,10 @@
+'use client';
+
+import { useState } from 'react';
+import { createSupabaseBrowserClient } from '../../lib/supabase-browser';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [signup, setSignup] = useState(false); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
+  async function submit(event: React.FormEvent) { event.preventDefault(); setBusy(true); setMessage(''); try { const supabase = createSupabaseBrowserClient(); const result = signup ? await supabase.auth.signUp({ email, password }) : await supabase.auth.signInWithPassword({ email, password }); if (result.error) throw result.error; if (!signup) { window.location.assign('/dashboard'); return; } setMessage('Check your email to confirm your account.'); } catch { setMessage(signup ? 'Your account could not be created. Check the details and try again.' : 'Your session could not be started. Check your email and password, then try again.'); } finally { setBusy(false); } }
+  return <main className="auth-shell"><div className="auth-card"><div className="brand"><span className="brand-mark">T</span><span>TeachCraft</span></div><p className="eyebrow">LECTURER WORKSPACE</p><h1>{signup ? 'Create your account' : 'Welcome back'}</h1><p className="auth-copy">Save your lesson designs, return to your materials, and build a reusable teaching library.</p><form onSubmit={submit}><label>Email<input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></label><label>Password<input required minLength={8} type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label><button className="primary" disabled={busy}>{busy ? 'Please wait…' : signup ? 'Create account' : 'Sign in'}</button></form>{message && <p className="auth-message">{message}</p>}<button className="switch" onClick={() => { setSignup(!signup); setMessage(''); }}>{signup ? 'Already have an account? Sign in' : 'Need an account? Create one'}</button></div></main>;
+}
